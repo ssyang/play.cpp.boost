@@ -4,10 +4,22 @@
     <Filter Include="inc">
       <UniqueIdentifier>{77cf3cfc-4dd5-45ae-876a-11db49e45ed9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="code_tools">
+      <UniqueIdentifier>{a410e572-a6b1-48cc-b677-10554bc24e38}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\inc\shm_deque.h">
       <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\inc\test_item.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\code_tools\ns_boost\ct_shm_deque.h">
+      <Filter>code_tools</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\code_tools\ns_boost\ct_shm_req_deque_rsp_map.h">
+      <Filter>code_tools</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

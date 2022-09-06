@@ -14,6 +14,9 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\code_tools\ns_boost\ct_shm_deque.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\..\..\code_tools\ns_boost\ct_shm_req_deque_rsp_map.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\inc\shm_deque.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\inc\test_item.h" />
   </ItemGroup>
 </Project>

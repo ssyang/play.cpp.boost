@@ -52,10 +52,10 @@ public:
 		std::string s_shared_mem_name(_ns_tools::ct_string::get_mcsc_from_unicode(ws_shared_mem_name));
 		m_b_ini = _initialize(true, s_shared_mem_name, n_shared_mem, n_deque_max_size);
 	}
-	shm_deque(const std::wstring& ws_shared_mem_name)
+	shm_deque(const std::wstring& ws_shared_mem_name, size_t n_deque_max_size)
 	{
 		std::string s_shared_mem_name(_ns_tools::ct_string::get_mcsc_from_unicode(ws_shared_mem_name));
-		m_b_ini = _initialize(false, s_shared_mem_name,0,0);
+		m_b_ini = _initialize(false, s_shared_mem_name,0, n_deque_max_size);
 	}
 
 
