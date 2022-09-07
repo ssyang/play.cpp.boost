@@ -23,7 +23,7 @@ int main(int argc, char** argv)
 
 	do
 	{
-		boost::this_thread::sleep(boost::posix_time::milliseconds(wait_milisec*10));
+		boost::this_thread::sleep(boost::posix_time::milliseconds(wait_milisec));
 
 		item.n_pid = n_pid;
 		++item.n_data;
