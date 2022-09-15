@@ -8,8 +8,10 @@
 #include <boost/interprocess/sync/named_mutex.hpp>
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
+#include <boost/interprocess/sync/interprocess_mutex.hpp>
 
 #include <atltrace.h>
+
 
 class shm_cv_nm : public boost::interprocess::named_condition
 {

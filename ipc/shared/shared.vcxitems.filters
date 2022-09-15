@@ -30,5 +30,8 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\inc\shm_lock_guard_fl.h">
       <Filter>inc</Filter>
     </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\inc\shm_cv_am.h">
+      <Filter>inc</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

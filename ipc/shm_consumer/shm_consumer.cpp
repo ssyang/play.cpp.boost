@@ -3,6 +3,7 @@
 #include <string>
 #include <utility>
 #include <ct_string.h>
+#include <boost/thread.hpp>
 
 #include <ns_boost/ct_shm_req_deque_rsp_map.h>
 #include "test_item.h"
@@ -28,7 +29,7 @@ BOOL CtrlHandler1(DWORD fdwCtrlType)
 	case CTRL_BREAK_EVENT:
 	default:
 		//q.call_deleter();
-		ptr_q.reset();
+		//ptr_q.reset();
 		std::cout << "terminated" << std::endl;
 		ATLTRACE("terminated. by handler_1\n");
 	}
