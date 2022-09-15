@@ -6,21 +6,22 @@
 #include <boost/thread.hpp>
 #include <boost/interprocess/sync/named_condition.hpp>
 #include <boost/interprocess/sync/named_mutex.hpp>
+#include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/interprocess/sync/scoped_lock.hpp>
 
 #include <atltrace.h>
 
-class shm_cv : public boost::interprocess::named_condition
+class shm_cv_fl : public boost::interprocess::named_condition
 {
 public:
-	~shm_cv()
+	~shm_cv_fl()
 	{
 		if (m_b_ini && m_b_owner)
 			*m_pn_notify = 0;
 		//
 	}
 
-	shm_cv(boost::interprocess::create_only_t a, boost::interprocess::managed_shared_memory *p_mshm, const char* name, const boost::interprocess::permissions& perm = boost::interprocess::permissions())
+	shm_cv_fl(boost::interprocess::create_only_t a, boost::interprocess::managed_shared_memory *p_mshm, const char* name, const boost::interprocess::permissions& perm = boost::interprocess::permissions())
 		: boost::interprocess::named_condition(a,name, perm)
 	{
 		m_b_ini = false;
@@ -31,7 +32,7 @@ public:
 		//
 		m_b_ini = _create();
 	}
-	shm_cv(boost::interprocess::open_or_create_t a, boost::interprocess::managed_shared_memory* p_mshm, const char* name, const boost::interprocess::permissions& perm = boost::interprocess::permissions())
+	shm_cv_fl(boost::interprocess::open_or_create_t a, boost::interprocess::managed_shared_memory* p_mshm, const char* name, const boost::interprocess::permissions& perm = boost::interprocess::permissions())
 		: boost::interprocess::named_condition(a, name, perm)
 	{
 		m_b_ini = false;
@@ -48,7 +49,7 @@ public:
 		}
 
 	}
-	shm_cv(boost::interprocess::open_only_t a, boost::interprocess::managed_shared_memory* p_mshm, const char* name)
+	shm_cv_fl(boost::interprocess::open_only_t a, boost::interprocess::managed_shared_memory* p_mshm, const char* name)
 		: boost::interprocess::named_condition(a, name)
 	{
 		m_b_ini = false;
@@ -60,19 +61,19 @@ public:
 		m_b_ini = _open();
 	}
 
-	shm_cv(boost::interprocess::create_only_t a, boost::interprocess::managed_shared_memory* p_mshm, const wchar_t* name, const boost::interprocess::permissions& perm = boost::interprocess::permissions())
+	shm_cv_fl(boost::interprocess::create_only_t a, boost::interprocess::managed_shared_memory* p_mshm, const wchar_t* name, const boost::interprocess::permissions& perm = boost::interprocess::permissions())
 		: boost::interprocess::named_condition(a, name, perm)
 	{
 		m_b_ini = false;
 		m_p_mshm = p_mshm;
 	}
-	shm_cv(boost::interprocess::open_or_create_t a, boost::interprocess::managed_shared_memory* p_mshm, const wchar_t* name, const boost::interprocess::permissions& perm = boost::interprocess::permissions())
+	shm_cv_fl(boost::interprocess::open_or_create_t a, boost::interprocess::managed_shared_memory* p_mshm, const wchar_t* name, const boost::interprocess::permissions& perm = boost::interprocess::permissions())
 		: boost::interprocess::named_condition(a, name, perm)
 	{
 		m_b_ini = false;
 		m_p_mshm = p_mshm;
 	}
-	shm_cv(boost::interprocess::open_only_t a, boost::interprocess::managed_shared_memory* p_mshm, const wchar_t* name)
+	shm_cv_fl(boost::interprocess::open_only_t a, boost::interprocess::managed_shared_memory* p_mshm, const wchar_t* name)
 		: boost::interprocess::named_condition(a, name)
 	{
 		m_b_ini = false;
@@ -89,7 +90,7 @@ public:
 			}
 
 			{
-				boost::interprocess::scoped_lock<boost::interprocess::named_mutex> lock(*m_p_mutex);
+				boost::interprocess::scoped_lock<boost::interprocess::file_lock> lock(*m_p_mutex);
 
 				if (fixed_status)
 					*m_pn_notify = SIZE_MAX;
@@ -112,6 +113,7 @@ public:
 		boost::interprocess::named_condition::notify_all();
 	}
 
+	// this function occur spurious wakeup =====================
 	//!Releases the lock on the named_mutex object associated with lock, blocks
 	//!the current thread of execution until readied by a call to
 	//!this->notify_one() or this->notify_all(), and then reacquires the lock.
@@ -124,7 +126,7 @@ public:
 
 			while (true) {
 				{
-					boost::interprocess::scoped_lock<boost::interprocess::named_mutex> _lock(*m_p_mutex);
+					boost::interprocess::scoped_lock<boost::interprocess::file_lock> _lock(*m_p_mutex);
 					if (*m_pn_notify > 0) {
 						if (*m_pn_notify != SIZE_MAX) {
 							--(*m_pn_notify);
@@ -195,7 +197,7 @@ public:
 
 			while (true) {
 				{
-					boost::interprocess::scoped_lock<boost::interprocess::named_mutex> _lock(*m_p_mutex);
+					boost::interprocess::scoped_lock<boost::interprocess::file_lock> _lock(*m_p_mutex);
 					if (*m_pn_notify > 0) {
 						if (*m_pn_notify != SIZE_MAX) {
 							--(*m_pn_notify);
@@ -242,7 +244,7 @@ public:
 		do {
 			if (!m_b_ini)
 				continue;
-			boost::interprocess::scoped_lock<boost::interprocess::named_mutex> lock(*m_p_mutex);
+			boost::interprocess::scoped_lock<boost::interprocess::file_lock> lock(*m_p_mutex);
 			if (*m_pn_notify != SIZE_MAX)
 				continue;
 			b_result = true;
@@ -258,13 +260,11 @@ protected:
 		m_b_owner = false;
 
 		do {
-			boost::interprocess::named_mutex::remove(_get_name_of_mutex().c_str());
-
 			if (!m_p_mshm)
 				continue;
 			//
 			try {
-				m_p_mutex = new boost::interprocess::named_mutex(boost::interprocess::create_only, _get_name_of_mutex().c_str());
+				m_p_mutex = new boost::interprocess::file_lock( _get_name_of_mutex().c_str());
 				if (!m_p_mutex) {
 					continue;
 				}
@@ -305,7 +305,7 @@ protected:
 				continue;
 			//
 			try {
-				m_p_mutex = new boost::interprocess::named_mutex(boost::interprocess::open_only, _get_name_of_mutex().c_str());
+				m_p_mutex = new boost::interprocess::file_lock( _get_name_of_mutex().c_str());
 				if (!m_p_mutex) {
 					continue;
 				}
@@ -358,11 +358,11 @@ protected:
 
 	//shared mem member
 	size_t *m_pn_notify;
-	boost::interprocess::named_mutex *m_p_mutex;
+	boost::interprocess::file_lock*m_p_mutex;
 
 
 private://don't call these method
-	shm_cv();
-	shm_cv(const shm_cv&);
-	shm_cv& operator=(const shm_cv&);
+	shm_cv_fl();
+	shm_cv_fl(const shm_cv_fl&);
+	shm_cv_fl& operator=(const shm_cv_fl&);
 };
